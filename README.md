@@ -1,5 +1,8 @@
 # qoder-skin-skill
 
+[![validate](https://github.com/Ailln/qoder-skin-skill/actions/workflows/validate.yml/badge.svg)](https://github.com/Ailln/qoder-skin-skill/actions/workflows/validate.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 给 [Qoder](https://qoder.com) 编辑器换肤的 Claude Code Skill。装上之后，对 Claude Code 说一句「给 Qoder 做一套赛博朋克风格的皮肤」，它会帮你把配色、背景图、毛玻璃材质一整套做好并装上。
 
 不修改应用安装包、不动 `app.asar`、不重新签名，随时可以完整恢复。
@@ -110,3 +113,11 @@ Qoder 升级后 DOM 结构和 `aicoding.*` 颜色键可能变化，升级后建�
 `skins/qoder-moonlit-sakura/` 是一套完整可用的皮肤，同时也是新皮肤的配色基线（203 个颜色键，含 34 个已验证的 `aicoding.*` 键）。
 
 主视觉由 AI 生成，原创角色与场景，无现成动漫 IP、无品牌元素。
+
+## 许可
+
+代码、脚本和文档以 [MIT](LICENSE) 发布。
+
+`skins/qoder-moonlit-sakura/assets/` 下的插画为 AI 生成的原创素材，同样按 MIT 提供，但请注意 AI 生成内容的版权在不同司法辖区仍存在争议，商业使用前请自行评估。
+
+本项目与 Qoder 官方无关。换肤依赖 Qoder 的内部页面结构和颜色键，升级后可能失效，请自担风险。

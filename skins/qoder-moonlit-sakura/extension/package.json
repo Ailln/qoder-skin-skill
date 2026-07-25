@@ -4,7 +4,7 @@
   "description": "为 Qoder CN 1.8.x 设计的原创二次元夜樱主题。",
   "version": "0.1.0",
   "publisher": "ailln-local",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -26,5 +26,9 @@
         "path": "./themes/qoder-moonlit-sakura-color-theme.json"
       }
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ailln/qoder-skin-skill"
   }
 }

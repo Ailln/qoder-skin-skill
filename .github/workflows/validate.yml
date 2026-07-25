@@ -1,0 +1,37 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    # 脚本用 zsh 和 BSD 版 stat，且目标平台就是 macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 确认依赖
+        run: |
+          command -v jq  >/dev/null || brew install jq
+          command -v node >/dev/null || brew install node
+          jq --version && node --version && zsh --version
+
+      - name: 校验所有皮肤
+        run: |
+          set -e
+          for dir in skins/*/; do
+            ./scripts/validate.sh "$(basename "$dir")"
+          done
+
+      - name: 脚手架冒烟测试
+        run: |
+          set -e
+          ./scripts/new-skin.sh qoder-ci-smoke "CI 冒烟"
+          # 新皮肤还没有背景图，validate 必然报错，这里只确认它确实报了背景图缺失
+          if ./scripts/validate.sh qoder-ci-smoke; then
+            echo "缺背景图的皮肤竟然通过了校验，说明校验失效" >&2
+            exit 1
+          fi
+          ./scripts/validate.sh qoder-ci-smoke 2>&1 | grep -q '背景图缺失'

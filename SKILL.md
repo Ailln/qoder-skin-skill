@@ -89,13 +89,20 @@ VS Code 主题机制不能设置窗口背景图，Quest 又是 Qoder 自己的�
 
 查 JSON / Node / Shell 语法、字段一致性、`aicoding.*` 键白名单、CSS 关键约束、与基线配色的重复度、VSIX 可解压。必须全绿再往下走。
 
-### 7. 安装颜色主题
+### 7. 安装并激活颜色主题
 
 ```bash
 ./scripts/install-theme.sh <slug>
+./scripts/apply-theme.sh <slug>
 ```
 
-装完**要用户手动选一次**：文件 → 首选项 → 主题 → 颜色主题 → 新主题名。
+`apply-theme.sh` 把主题写进 Qoder 的 `settings.json`，省掉手工在菜单里选。
+
+**这里有个必须知道的坑**：`workbench.colorTheme` 匹配的是主题的 **id**，不是 label。手写成
+`"Qoder 像素猫"`（label）会解析失败，然后**静默回落到默认主题**——界面看起来像换肤失败，
+其实是设置没生效。脚本已经取 id 写入，不要自己拼 label。
+
+主题是刚装的时候，运行中的窗口还没注册它，需要重载窗口或重启 Qoder 才会应用。
 
 ### 8. 启动完整皮肤
 
@@ -107,9 +114,32 @@ VS Code 主题机制不能设置窗口背景图，Quest 又是 Qoder 自己的�
 
 Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判断成功的标准不是窗口打开了，而是 `logs/<slug>-qoder.log` 里出现 `DevTools listening on ws://127.0.0.1:...`，且 `logs/<slug>-injector.log` 出现 `[已应用]`。
 
-### 9. 实机验证
+### 9. 截图，自己看
 
-不要只声称完成。至少逐项确认：主编辑器代码可读性、文件树、终端、Diff、搜索框与建议框、AI 侧栏 / Chat、**Quest 独立窗口**、背景不拦截点击和输入。
+**不要只声称完成——先截图，再自己看一眼。**
+
+```bash
+./scripts/screenshot.sh <slug>
+```
+
+它通过 CDP 把每个渲染页面截下来存到 `skins/<slug>/screenshots/`，然后你要真的读这些图片，
+
+**这些截图会拍到用户真实的文件树、代码和 AI 对话内容。** 它们默认已被 `.gitignore` 排除，
+不要提交、不要发到外部服务。确实要附效果图时，先逐张看过确认无隐私，再单独 `git add -f`。
+
+读图后
+逐项确认：主编辑器代码可读性、文件树、终端、Diff、搜索框与建议框、AI 侧栏 / Chat、
+**Quest 独立窗口**、背景不拦截点击和输入。
+
+不满意就改 `skin.css` 再截一次——注入器每轮会重读 CSS 和图片，**改完等 3 秒就生效，不用重启**。
+插画层的四个变量（size / position / opacity / mask）通常要调两三轮才合适，见
+`references/runtime-layer.md`。
+
+环境层面的问题（主题没切、注入器打架、应用被别的方案改过）用体检脚本定位：
+
+```bash
+./scripts/doctor.sh
+```
 
 完整清单和常见故障见 `references/troubleshooting.md`。
 
@@ -134,7 +164,8 @@ Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判
 ```
 runtime/      cdp.mjs / injector.mjs / restore.mjs —— 皮肤无关的共享运行时
 scripts/      new-skin / prepare-background / validate / package-vsix
-              install-theme / launch-themed-qoder / restore
+              install-theme / apply-theme / launch-themed-qoder
+              screenshot / doctor / restore
 templates/    新皮肤的 skin.css、skin.json、扩展清单模板
 skins/<slug>/ skin.json + skin.css + extension/ + assets/ + dist/ + screenshots/
 references/   按需查阅的详细资料

@@ -1,0 +1,28 @@
+{
+  "name": "qoder-voxel-cat",
+  "displayName": "Qoder 像素猫",
+  "description": "取色自体素猫插画的靛蓝配明黄主题。",
+  "version": "0.1.0",
+  "publisher": "local",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "qoder",
+    "theme"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "id": "qoder-voxel-cat",
+        "label": "Qoder 像素猫",
+        "uiTheme": "vs-dark",
+        "path": "./themes/qoder-voxel-cat-color-theme.json"
+      }
+    ]
+  }
+}

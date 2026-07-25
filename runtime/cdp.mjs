@@ -33,6 +33,54 @@ export async function listPageTargets(port) {
   });
 }
 
+// 发一组 CDP 命令，返回最后一条的结果。用于 Runtime.evaluate 之外的场景（如截图）。
+export async function command(target, calls, timeoutMs = REQUEST_TIMEOUT_MS) {
+  return new Promise((resolve, reject) => {
+    const socket = new WebSocket(target.webSocketDebuggerUrl);
+    const timeout = setTimeout(() => {
+      socket.close();
+      reject(new Error(`CDP 命令超时：${target.title || target.id}`));
+    }, timeoutMs);
+
+    const finish = (error, value) => {
+      clearTimeout(timeout);
+      try {
+        socket.close();
+      } catch {
+        // target 可能已经关闭
+      }
+      error ? reject(error) : resolve(value);
+    };
+
+    let index = 0;
+    const send = () => {
+      const [method, params] = calls[index];
+      socket.send(JSON.stringify({ id: index + 1, method, params: params ?? {} }));
+    };
+
+    socket.addEventListener("open", send);
+    socket.addEventListener("message", (event) => {
+      const message = JSON.parse(String(event.data));
+      if (message.id !== index + 1) {
+        return;
+      }
+      if (message.error) {
+        finish(new Error(JSON.stringify(message.error)));
+        return;
+      }
+      index += 1;
+      if (index >= calls.length) {
+        finish(null, message.result);
+        return;
+      }
+      send();
+    });
+    socket.addEventListener("error", () => {
+      finish(new Error(`WebSocket 失败：${target.title || target.id}`));
+    });
+  });
+}
+
 export async function evaluate(target, expression) {
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(target.webSocketDebuggerUrl);

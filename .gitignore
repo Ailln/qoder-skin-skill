@@ -3,3 +3,7 @@ logs/
 skins/*/.injector.pid
 skins/*/.vsix-build/
 skins/*/dist/
+
+# 截图会拍到用户真实项目的文件树、代码和对话内容，默认不进仓库。
+# 确实要随皮肤附效果图时，先逐张看过确认无隐私，再 git add -f 单个文件。
+skins/*/screenshots/

@@ -7,35 +7,35 @@
 
 :root {
   /* 编辑器正文区：低于 0.72 代码可读性明显下降 */
-  --qoder-skin-editor: rgba(14, 16, 32, 0.78);
+  --qoder-skin-editor: rgba(18, 16, 48, 0.80);
   /* 侧栏、活动栏、标题栏、状态栏 */
-  --qoder-skin-side: rgba(17, 20, 38, 0.82);
+  --qoder-skin-side: rgba(22, 20, 60, 0.84);
   /* 底部面板与终端 */
-  --qoder-skin-panel: rgba(18, 21, 41, 0.80);
+  --qoder-skin-panel: rgba(21, 18, 58, 0.82);
   /* 弹窗、菜单、建议框：必须比编辑器更实，建议 0.86–0.94 */
-  --qoder-skin-card: rgba(25, 27, 49, 0.88);
+  --qoder-skin-card: rgba(28, 25, 72, 0.90);
   /* 低对比描边，用品牌色 + 很低的 alpha */
-  --qoder-skin-border: rgba(226, 142, 180, 0.18);
+  --qoder-skin-border: rgba(255, 201, 60, 0.16);
 
   /* ---- 插画层（html::after）：按背景图的主体大小和亮度调 ---- */
   /* cover 会把主体放大到铺满窗口。主体本身占比大、或颜色明亮时，
      改成 auto <高度百分比> 让它保持小尺寸缩在角落。 */
-  --qoder-skin-art-size: auto 46%;
-  --qoder-skin-art-position: right 1% bottom 4%;
+  --qoder-skin-art-size: auto 30%;
+  --qoder-skin-art-position: right -4% bottom -7%;
   /* 主体越亮、对比越强，这个值就要越低。深色柔和插画可到 0.28。 */
-  --qoder-skin-art-opacity: 0.30;
+  --qoder-skin-art-opacity: 0.26;
   /* 遮罩把主体限制在右侧。AI 面板通常占右三分之一，
      主体压在面板文字后面时，把起点继续往右推。 */
-  --qoder-skin-art-mask: linear-gradient(90deg, transparent 46%, rgba(0, 0, 0, 0.25) 60%, #000 74%);
+  --qoder-skin-art-mask: radial-gradient(ellipse 34% 40% at 92% 88%, #000 30%, rgba(0, 0, 0, 0.45) 58%, transparent 84%);
 
-  --qoder-skin-shadow: rgba(4, 5, 14, 0.38);
+  --qoder-skin-shadow: rgba(6, 5, 22, 0.42);
 }
 
 /* 第一层背景：整窗铺图，左侧压暗渐变给代码区让位 */
 html {
-  background-color: #0b0d1a !important;
+  background-color: #0f0d28 !important;
   background-image:
-    linear-gradient(90deg, rgba(8, 10, 24, 0.84) 0%, rgba(8, 10, 24, 0.48) 58%, rgba(8, 10, 24, 0.18) 100%),
+    linear-gradient(90deg, rgba(13, 11, 34, 0.90) 0%, rgba(13, 11, 34, 0.58) 58%, rgba(13, 11, 34, 0.24) 100%),
     var(--qoder-skin-image) !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
@@ -74,9 +74,9 @@ body,
   --color-border: var(--qoder-skin-border) !important;
   --color-border-secondary: var(--qoder-skin-border) !important;
   --color-border-tertiary: var(--qoder-skin-border) !important;
-  --color-fill: rgba(52, 48, 76, 0.86) !important;
-  --color-fill-secondary: rgba(43, 41, 67, 0.84) !important;
-  --color-fill-tertiary: rgba(36, 37, 62, 0.82) !important;
+  --color-fill: rgba(48, 42, 114, 0.86) !important;
+  --color-fill-secondary: rgba(42, 37, 104, 0.84) !important;
+  --color-fill-tertiary: rgba(31, 28, 80, 0.82) !important;
   background-color: transparent !important;
 }
 
@@ -124,12 +124,12 @@ body {
 }
 
 .monaco-workbench .monaco-list-row:hover:not(.selected):not(.focused) {
-  background-color: rgba(64, 53, 82, 0.58) !important;
+  background-color: rgba(58, 52, 134, 0.58) !important;
 }
 
 .monaco-workbench .monaco-list-row.selected,
 .monaco-workbench .monaco-list-row.focused {
-  background-color: rgba(91, 63, 103, 0.74) !important;
+  background-color: rgba(69, 60, 150, 0.74) !important;
 }
 
 .monaco-workbench .part.sidebar,

@@ -24,9 +24,59 @@ open -na '/Applications/Qoder CN.app' --args --remote-debugging-port=9333   # �
 
 所以启动脚本直接调用应用包内的 `Contents/MacOS/Electron`。它仍是官方签名包里的可执行文件，没有替换或改写任何程序。
 
+### 切了主题却没变色
+
+`workbench.colorTheme` 匹配的是主题的 **id**，不是显示名。写成 label（`"Qoder 像素猫"`）会解析
+失败，然后**静默回落到默认主题**——看起来像换肤没成功，其实是设置没生效，日志里也不会报错。
+
+用 `./scripts/apply-theme.sh <slug>` 写入，它取的是 `contributes.themes[0].id`。
+排查时用 `./scripts/doctor.sh` 看当前值，或直接读实际生效的颜色：
+
+```bash
+# 主题真生效时 editorBg 应该等于你主题里的 editor.background
+node runtime/screenshot.mjs --port 9333 --out /tmp/shot   # 或直接看截图
+```
+
+另外，**刚用 CLI 装好的扩展，运行中的窗口不会自动注册**，需要重载窗口或重启 Qoder。
+
+### 应用被别的换肤方案改过
+
+有些换肤方案（包括一些叫 `*-background`、`custom-css` 的扩展）直接改写应用包里的
+`workbench.html`，插入自己的 `<style>` 和一份放宽的 CSP。后果：
+
+- Qoder 弹「安装似乎损坏。请重新安装。」——`product.json` 里的校验和对不上了
+- `codesign --verify` 报 `a sealed resource is missing or invalid`
+- 它的 `body::before` 会和本 skill 注入的背景叠在一起，调什么都不对
+- macOS 的 App Management 保护会拦住后续写入，于是不停弹 `EPERM: operation not permitted`
+
+`./scripts/doctor.sh` 第 1 步会直接比对校验和并指出注入标记。要还原成原始文件：
+
+```bash
+# 期望校验和取自 product.json，删掉注入块后应当能精确匹配
+jq -r '.checksums["vs/code/electron-browser/workbench/workbench.html"]' \
+  "/Applications/Qoder CN.app/Contents/Resources/app/product.json"
+```
+
+删掉 `<!-- qoder-background-start -->` 到 `<!-- qoder-background-end -->` 之间的内容以及
+多余空行，直到 sha256（base64、去 padding）与期望值一致。注意**写回需要终端具备
+「App 管理」权限**（系统设置 → 隐私与安全性 → App 管理），否则会报 `operation not permitted`。
+
 ### 有配色但没有背景图
 
 预期行为。VSIX 只负责第一层，背景图来自 CDP 注入。用户从 Dock 点开时只有配色，不代表主题装失败。
+
+### 背景图主体太大 / 压住文字
+
+`background-size: cover` 会把插画放大到铺满窗口。主体本身占比就大、或者是高饱和的纯色块时，
+它会糊住半个界面，尤其是压在右侧 AI 面板的文字后面。
+
+改 `--qoder-skin-art-size` 为 `auto 28%–36%`，位置用负值推到窗口边缘外，
+`--qoder-skin-art-opacity` 降到 0.20–0.26。详见 `references/runtime-layer.md`。
+
+### 缩小插画后右下角出现一个方块
+
+图片自带不透明背景时，缩小后整张图的矩形边界会露出来。横向线性遮罩只挡左右，挡不住上边缘。
+把 `--qoder-skin-art-mask` 换成径向遮罩，从主体位置四周淡出。
 
 ### 背景图在但主体几乎看不见
 
@@ -48,16 +98,18 @@ open -na '/Applications/Qoder CN.app' --args --remote-debugging-port=9333   # �
 
 ## 交付前验证清单
 
+先跑 `./scripts/doctor.sh` 排除环境问题（应用被改过、没有调试端口、多个注入器打架、主题没切）。
+
 静态部分（`./scripts/validate.sh <slug>` 已全部覆盖）：JSON 语法、Node / Shell 语法、字段一致性、`aicoding.*` 白名单、CSS 关键约束、VSIX 可解压。
 
 实机部分必须人工或截图确认，**不要只声称完成**：
 
 1. 主题能被 Qoder CLI 装上。
-2. 主题出现在颜色主题选择器里，且名字正确。
+2. 主题真的生效了——不是「设置里写了」，而是截图上颜色确实变了。
 3. 启动日志出现 `DevTools listening`。
 4. 注入日志对 Editor 和 Quest 都打印了 `[已应用]`。
 5. 背景不拦截点击、输入、拖动和快捷键。
-6. 逐项看可读性：代码正文、行号、文件树、终端、Diff、搜索框、建议框、AI 侧栏 / Chat、**Quest 独立窗口**。
+6. 用 `./scripts/screenshot.sh <slug>` 截图并**真的打开看**，逐项确认可读性：代码正文、行号、文件树、终端、Diff、搜索框、建议框、AI 侧栏 / Chat、**Quest 独立窗口**。
 7. 跑 `./scripts/restore.sh` 后背景和毛玻璃消失，界面回到纯配色状态。
 8. 在 Qoder 里切回内置主题（如 Qoder Dark），原生配色恢复正常。
 

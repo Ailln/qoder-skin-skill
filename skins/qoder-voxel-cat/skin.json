@@ -1,0 +1,6 @@
+{
+  "id": "qoder-voxel-cat",
+  "background": "assets/qoder-voxel-cat.webp",
+  "css": "skin.css",
+  "port": 9333
+}

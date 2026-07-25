@@ -1,0 +1,6 @@
+{
+  "id": "__SKIN_ID__",
+  "background": "assets/__SKIN_ID__.webp",
+  "css": "skin.css",
+  "port": 9333
+}

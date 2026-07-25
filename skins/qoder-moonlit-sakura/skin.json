@@ -1,0 +1,6 @@
+{
+  "id": "qoder-moonlit-sakura",
+  "background": "assets/moonlit-sakura.webp",
+  "css": "skin.css",
+  "port": 9333
+}

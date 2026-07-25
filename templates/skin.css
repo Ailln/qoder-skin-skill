@@ -1,0 +1,137 @@
+/*
+ * Qoder 皮肤运行时样式模板。
+ *
+ * 注入器会把背景图写进 --qoder-skin-image（data URL），这个变量名固定，不要改。
+ * 下面六个变量是全部调色入口，请按新皮肤的配色替换 RGB，透明度沿用注释里的经验区间。
+ */
+
+:root {
+  /* 编辑器正文区：低于 0.72 代码可读性明显下降 */
+  --qoder-skin-editor: rgba(14, 16, 32, 0.78);
+  /* 侧栏、活动栏、标题栏、状态栏 */
+  --qoder-skin-side: rgba(17, 20, 38, 0.82);
+  /* 底部面板与终端 */
+  --qoder-skin-panel: rgba(18, 21, 41, 0.80);
+  /* 弹窗、菜单、建议框：必须比编辑器更实，建议 0.86–0.94 */
+  --qoder-skin-card: rgba(25, 27, 49, 0.88);
+  /* 低对比描边，用品牌色 + 很低的 alpha */
+  --qoder-skin-border: rgba(226, 142, 180, 0.18);
+  --qoder-skin-shadow: rgba(4, 5, 14, 0.38);
+}
+
+/* 第一层背景：整窗铺图，左侧压暗渐变给代码区让位 */
+html {
+  background-color: #0b0d1a !important;
+  background-image:
+    linear-gradient(90deg, rgba(8, 10, 24, 0.84) 0%, rgba(8, 10, 24, 0.48) 58%, rgba(8, 10, 24, 0.18) 100%),
+    var(--qoder-skin-image) !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/*
+ * 第二层背景：在所有 UI 之上再画一次图，用横向 mask 只让右侧主体透出来。
+ * pointer-events: none 不能删，否则整个界面点不动。
+ */
+html::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  background-image: var(--qoder-skin-image);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0.28;
+  -webkit-mask-image: linear-gradient(90deg, transparent 50%, rgba(0, 0, 0, 0.18) 64%, #000 82%);
+  mask-image: linear-gradient(90deg, transparent 50%, rgba(0, 0, 0, 0.18) 64%, #000 82%);
+}
+
+/* Qoder 自定义页面（Quest / Chat）用的是这套 --color-* 设计变量，不是 VS Code 颜色键 */
+html,
+body,
+.monaco-workbench {
+  --color-bg-base: var(--qoder-skin-side) !important;
+  --color-bg-container: var(--qoder-skin-editor) !important;
+  --color-bg-elevated: var(--qoder-skin-card) !important;
+  --color-bg-layout: var(--qoder-skin-side) !important;
+  --color-bg-spotlight: var(--qoder-skin-card) !important;
+  --color-border: var(--qoder-skin-border) !important;
+  --color-border-secondary: var(--qoder-skin-border) !important;
+  --color-border-tertiary: var(--qoder-skin-border) !important;
+  --color-fill: rgba(52, 48, 76, 0.86) !important;
+  --color-fill-secondary: rgba(43, 41, 67, 0.84) !important;
+  --color-fill-tertiary: rgba(36, 37, 62, 0.82) !important;
+  background-color: transparent !important;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.monaco-workbench,
+.monaco-workbench > .part,
+.monaco-workbench .part > .content {
+  background-image: none !important;
+}
+
+.monaco-workbench > .part.titlebar,
+.monaco-workbench > .part.activitybar,
+.monaco-workbench > .part.sidebar,
+.monaco-workbench > .part.auxiliarybar,
+.monaco-workbench > .part.statusbar,
+.monaco-workbench > .part.panel {
+  background-color: var(--qoder-skin-side) !important;
+  backdrop-filter: blur(18px) saturate(118%);
+  -webkit-backdrop-filter: blur(18px) saturate(118%);
+}
+
+.monaco-workbench > .part.editor,
+.monaco-workbench .editor-group-container,
+.monaco-workbench .editor-container,
+.monaco-workbench .monaco-editor,
+.monaco-workbench .monaco-editor-background,
+.monaco-workbench .monaco-editor .margin {
+  background-color: var(--qoder-skin-editor) !important;
+}
+
+.monaco-workbench .quick-input-widget,
+.monaco-workbench .context-view,
+.monaco-workbench .monaco-dialog-box,
+.monaco-workbench .notifications-toasts .notification-toast,
+.monaco-workbench .monaco-hover,
+.monaco-workbench .suggest-widget {
+  background-color: var(--qoder-skin-card) !important;
+  border-color: var(--qoder-skin-border) !important;
+  box-shadow: 0 18px 48px var(--qoder-skin-shadow) !important;
+  backdrop-filter: blur(22px) saturate(125%);
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+}
+
+.monaco-workbench .monaco-list-row:hover:not(.selected):not(.focused) {
+  background-color: rgba(64, 53, 82, 0.58) !important;
+}
+
+.monaco-workbench .monaco-list-row.selected,
+.monaco-workbench .monaco-list-row.focused {
+  background-color: rgba(91, 63, 103, 0.74) !important;
+}
+
+.monaco-workbench .part.sidebar,
+.monaco-workbench .part.panel,
+.monaco-workbench .part.auxiliarybar {
+  border-color: var(--qoder-skin-border) !important;
+}
+
+.monaco-workbench > .part.panel {
+  background-color: var(--qoder-skin-panel) !important;
+}
+
+body > div,
+body > main,
+body > section {
+  background-color: transparent !important;
+}

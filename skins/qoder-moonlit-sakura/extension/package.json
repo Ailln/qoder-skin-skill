@@ -1,0 +1,30 @@
+{
+  "name": "qoder-moonlit-sakura",
+  "displayName": "Qoder 月夜樱",
+  "description": "为 Qoder CN 1.8.x 设计的原创二次元夜樱主题。",
+  "version": "0.1.0",
+  "publisher": "ailln-local",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "qoder",
+    "theme",
+    "anime",
+    "sakura"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "id": "qoder-moonlit-sakura",
+        "label": "Qoder 月夜樱",
+        "uiTheme": "vs-dark",
+        "path": "./themes/qoder-moonlit-sakura-color-theme.json"
+      }
+    ]
+  }
+}

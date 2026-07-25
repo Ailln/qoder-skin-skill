@@ -1,0 +1,28 @@
+{
+  "name": "__SKIN_ID__",
+  "displayName": "__SKIN_DISPLAY_NAME__",
+  "description": "__SKIN_DESCRIPTION__",
+  "version": "0.1.0",
+  "publisher": "__SKIN_PUBLISHER__",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "qoder",
+    "theme"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "id": "__SKIN_THEME_ID__",
+        "label": "__SKIN_DISPLAY_NAME__",
+        "uiTheme": "vs-dark",
+        "path": "./themes/__SKIN_ID__-color-theme.json"
+      }
+    ]
+  }
+}

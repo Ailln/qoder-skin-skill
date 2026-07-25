@@ -17,6 +17,13 @@
   /* 低对比描边，用品牌色 + 很低的 alpha */
   --qoder-skin-border: rgba(255, 201, 60, 0.16);
 
+  /* ---- Quest / Chat 页面的前景色 ----
+     Qoder 自定义页面不吃 VS Code 颜色键。背景被压深之后，文字不会自动翻成浅色，
+     必须在这里显式改写，否则就是深底深字。三档取自主题的 foreground，逐级降 alpha。 */
+  --qoder-skin-text: rgba(234, 232, 250, 0.96);
+  --qoder-skin-text-secondary: rgba(234, 232, 250, 0.74);
+  --qoder-skin-text-tertiary: rgba(234, 232, 250, 0.62);
+
   /* ---- 插画层（html::after）：按背景图的主体大小和亮度调 ---- */
   /* cover 会把主体放大到铺满窗口。主体本身占比大、或颜色明亮时，
      改成 auto <高度百分比> 让它保持小尺寸缩在角落。 */
@@ -65,7 +72,11 @@ html::after {
 /* Qoder 自定义页面（Quest / Chat）用的是这套 --color-* 设计变量，不是 VS Code 颜色键 */
 html,
 body,
-.monaco-workbench {
+.monaco-workbench,
+/* Quest 页面的 <html> 是 data-theme="light"，内部还有多个同名子作用域，
+   每个都会重新定义一遍 --color-*。不把选择器铺到每个作用域，改写就只在根节点生效，
+   子树里的文字仍然是写死的浅色模式深色。 */
+[data-theme] {
   --color-bg-base: var(--qoder-skin-side) !important;
   --color-bg-container: var(--qoder-skin-editor) !important;
   --color-bg-elevated: var(--qoder-skin-card) !important;
@@ -76,12 +87,67 @@ body,
   --color-border-tertiary: var(--qoder-skin-border) !important;
   --color-fill: rgba(48, 42, 114, 0.86) !important;
   --color-fill-secondary: rgba(42, 37, 104, 0.84) !important;
+  --color-fill-quaternary: var(--qoder-skin-editor) !important;
   --color-fill-tertiary: rgba(31, 28, 80, 0.82) !important;
+
+  /* 前景色：不改这一族，Quest 页面的标题和正文就是深底深字 */
+  --color-text: var(--qoder-skin-text) !important;
+  --color-text-base: var(--qoder-skin-text) !important;
+  --color-text-secondary: var(--qoder-skin-text-secondary) !important;
+  --color-text-tertiary: var(--qoder-skin-text-tertiary) !important;
+  --color-text-quaternary: var(--qoder-skin-text-tertiary) !important;
+  --color-popover-foreground: var(--qoder-skin-text) !important;
+  --color-accent-foreground: var(--qoder-skin-text) !important;
+  --color-muted-foreground: var(--qoder-skin-text-secondary) !important;
+
+  /* -static 族：Qoder 写死的浅色值，不跟随主题，必须一起改 */
+  --color-text-static: var(--qoder-skin-text) !important;
+  --color-text-secondary-static: var(--qoder-skin-text-secondary) !important;
+  --color-text-tertiary-static: var(--qoder-skin-text-tertiary) !important;
+  --color-text-quaternary-static: var(--qoder-skin-text-tertiary) !important;
+  --color-bg-base-static: var(--qoder-skin-side) !important;
+  --color-bg-layout-static: var(--qoder-skin-side) !important;
+  --color-bg-container-static: var(--qoder-skin-editor) !important;
+  --color-bg-elevated-static: var(--qoder-skin-card) !important;
+  --color-bg-spotlight-static: var(--qoder-skin-card) !important;
+  --color-fill-static: var(--color-fill) !important;
+  --color-fill-secondary-static: var(--color-fill-secondary) !important;
+  --color-fill-tertiary-static: var(--color-fill-tertiary) !important;
+  --color-fill-quaternary-static: var(--color-fill-tertiary) !important;
+  --color-border-static: var(--qoder-skin-border) !important;
+  --color-border-secondary-static: var(--qoder-skin-border) !important;
+  --color-border-tertiary-static: var(--qoder-skin-border) !important;
   background-color: transparent !important;
 }
 
 body {
   min-height: 100vh;
+}
+
+/*
+ * Quest 页面除了 Qoder 自己的 --color-*，还挂着一整套 VS Code 变量：它的 <body> 带的是
+ * 浅色主题 class .vs，容器 .quest-layout-mode 上的 --vscode-* 全是浅色默认值
+ * （--vscode-foreground: #141414）。VSIX 颜色主题只作用于 workbench renderer，管不到这里，
+ * 所以 Quest 里的下拉框、分支选择器、模型选择器这些组件仍然是深色文字。
+ *
+ * 作用域限定在 Quest，不要波及 workbench——那边的 --vscode-* 由 VSIX 主题正确驱动。
+ */
+.quest-layout-mode,
+body.vs {
+  --vscode-foreground: var(--qoder-skin-text) !important;
+  --vscode-descriptionForeground: var(--qoder-skin-text-secondary) !important;
+  --vscode-settings-dropdownForeground: var(--qoder-skin-text) !important;
+  --vscode-dropdown-foreground: var(--qoder-skin-text) !important;
+  --vscode-input-foreground: var(--qoder-skin-text) !important;
+  --vscode-settings-textInputForeground: var(--qoder-skin-text) !important;
+  --vscode-settings-numberInputForeground: var(--qoder-skin-text) !important;
+  --vscode-notifications-foreground: var(--qoder-skin-text) !important;
+  --vscode-menu-selectionForeground: var(--qoder-skin-text) !important;
+  --vscode-list-activeSelectionForeground: var(--qoder-skin-text) !important;
+  --vscode-list-inactiveSelectionForeground: var(--qoder-skin-text) !important;
+  /* aicoding.* 私有键在 Quest 上以 --vscode-aicoding-* 暴露，同样拿不到 VSIX 的值 */
+  --vscode-aicoding-colorTextTertiary: var(--qoder-skin-text-secondary) !important;
+  --vscode-aicoding-colorTextQuaternary: var(--qoder-skin-text-tertiary) !important;
 }
 
 .monaco-workbench,

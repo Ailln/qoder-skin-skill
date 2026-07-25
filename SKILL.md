@@ -114,9 +114,20 @@ VS Code 主题机制不能设置窗口背景图，Quest 又是 Qoder 自己的�
 
 Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判断成功的标准不是窗口打开了，而是 `logs/<slug>-qoder.log` 里出现 `DevTools listening on ws://127.0.0.1:...`，且 `logs/<slug>-injector.log` 出现 `[已应用]`。
 
-### 9. 截图，自己看
+### 9. 验证：先跑对比度门禁，再截图自己看
 
-**不要只声称完成——先截图，再自己看一眼。**
+**不要只声称完成。** 先过机器判据，再过肉眼。
+
+```bash
+./scripts/check-contrast.sh <slug>
+```
+
+它通过 CDP 遍历每个页面的可见文字，算出前景色与合成背景色的 WCAG 对比度，
+低于 4.5:1（大字 3:1）就非零退出并列出具体是哪几处。**必须全绿再往下走。**
+
+这一步专门拦一类必然不可读的 bug：Quest 页面的文字色写死在 `--color-text-*` 里，
+不会跟着背景翻色，只改背景不改前景就是深底深字。它测不到的是背景图压住文字的观感，
+那个只能看截图。
 
 ```bash
 ./scripts/screenshot.sh <slug>
@@ -130,6 +141,9 @@ Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判
 读图后
 逐项确认：主编辑器代码可读性、文件树、终端、Diff、搜索框与建议框、AI 侧栏 / Chat、
 **Quest 独立窗口**、背景不拦截点击和输入。
+
+**Quest 窗口要单独打开来看，不能只看编辑器。** 它是 Qoder 自己的 renderer，
+和编辑器共享的只有注入的 CSS，配色规则完全不同——编辑器完美不代表 Quest 没崩。
 
 不满意就改 `skin.css` 再截一次——注入器每轮会重读 CSS 和图片，**改完等 3 秒就生效，不用重启**。
 一般要两三轮才收敛，光看 CSS 数值判断不了效果。
@@ -165,10 +179,10 @@ Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判
 ## 目录结构
 
 ```
-runtime/      cdp.mjs / injector.mjs / restore.mjs —— 皮肤无关的共享运行时
+runtime/      cdp.mjs / injector.mjs / restore.mjs / contrast.mjs —— 皮肤无关的共享运行时
 scripts/      new-skin / prepare-background / validate / package-vsix
               install-theme / apply-theme / launch-themed-qoder
-              screenshot / doctor / restore
+              screenshot / check-contrast / doctor / restore
 templates/    新皮肤的 skin.css、skin.json、扩展清单模板
 skins/<slug>/ skin.json + skin.css + extension/ + assets/ + dist/ + screenshots/
 references/   按需查阅的详细资料

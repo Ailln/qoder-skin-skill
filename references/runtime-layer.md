@@ -99,16 +99,59 @@ CDP 的 `/json/list` 会把它们列成 page target。Quest 不是普通 VS Code
 
 ## Quest / Chat 页面
 
-Qoder 自定义页面不吃 VS Code 颜色键，走的是一套 `--color-*` 设计变量：
+Qoder 自定义页面不吃 VS Code 颜色键，走的是一套自己的 `--color-*` 设计变量（Qoder CN 1.8.1 上实测共 140 个）。
 
-```text
---color-bg-base  --color-bg-container  --color-bg-elevated
---color-bg-layout  --color-bg-spotlight
---color-border  --color-border-secondary  --color-border-tertiary
---color-fill  --color-fill-secondary  --color-fill-tertiary
+**只改背景不改前景是这套皮肤方案最容易踩的坑。** VS Code 那边换主题时编辑器文字会跟着翻色，
+Quest 这边不会——它的文字色是写死在 `--color-text-*` 里的浅色模式深色。你把背景压深、文字不动，
+结果就是 `#141414` 的标题落在 `#110F1E` 的底上，**对比度约 1:1，字等于看不见**。
+
+必须改的是三族，缺任何一族都有可见后果：
+
+| 族 | 变量 | 不改的后果 |
+|---|---|---|
+| 背景 / 填充 / 描边 | `--color-bg-*`、`--color-fill*`、`--color-border*` | 页面还是浅色底 |
+| **前景** | `--color-text`、`--color-text-base`、`--color-text-secondary/tertiary/quaternary`、`--color-popover-foreground`、`--color-accent-foreground`、`--color-muted-foreground` | **深底深字，正文不可读** |
+| **`-static`** | 上面两族各自的 `*-static` 孪生变量，另加 `--color-bg-base-static`、`--color-bg-layout-static`（都是写死的 `#FFFFFF`） | Quest 左侧 Quests/Chats 列表保持白底，和右侧深色割裂 |
+
+`-static` 是 Qoder 用来标记「不跟随主题」的一族，值全部写死成浅色。它不会因为你改了非 static 的同名变量而跟着变，
+必须逐个显式改写。完整映射见 `templates/skin.css`。
+
+### 坑一：选择器必须铺到每个 `[data-theme]` 作用域
+
+Quest 页面的 `<html>` 是 `data-theme="light"`（workbench 那边是 `dark`），**而且页面内部还有若干
+`<div data-theme="light">` 子作用域，每一个都会重新定义一整套 `--color-*`**。
+
+只把改写挂在 `html, body` 上，根节点的变量确实变了，但子树里的组件仍然读到内层重新定义的浅色值——
+表现就是「查根变量显示已生效、文字却还是黑的」。选择器必须包含 `[data-theme]`。
+
+### 坑二：Quest 上还并存着两套 VS Code 变量
+
+Quest 页面的 `<body>` 带的是 VS Code 浅色主题 class `.vs`，容器 `.quest-layout-mode` 上挂着完整的
+`--vscode-*`（实测 2420 个）和 `--vscode-aicoding-*`。**VSIX 颜色主题只作用于 workbench renderer，
+管不到 Quest**，所以这两族停留在浅色默认值，`--vscode-foreground` 就是 `#141414`。
+
+Quest 的下拉框、分支选择器、模型选择器这些组件直接读 `--vscode-settings-dropdownForeground`
+之类的变量，不改这一层，前面 `--color-*` 改得再全也没用。改写要**限定在 Quest 作用域**
+（`.quest-layout-mode, body.vs`），不要波及 workbench——那边的 `--vscode-*` 由 VSIX 主题正确驱动，
+覆盖它反而会把主题里精心区分的各种前景色抹平。
+
+一句话总结 Quest 的三层：`--color-*`（Qoder 设计系统）、`--vscode-*`（VS Code 主题变量）、
+`--vscode-aicoding-*`（Qoder 私有键）。三层都得改，缺一层就有一批组件是深底深字。
+
+**语义色族刻意不改**：`--color-error*`、`--color-warning*`、`--color-info*`、`--color-success*`、`--color-diff-*`
+以及 `--color-blue-bg` 这类色卡，是「浅色底 + 同色系深色字」的自洽组合。只改底不改字反而会让它们变得不可读，
+整族保持原样是当前的取舍。
+
+改完必须单独打开 Quest 窗口核对，**编辑器正常不代表 Quest 正常**——这两个页面是各自独立的 renderer。
+用 `scripts/check-contrast.sh <slug>` 量化验证，不要只靠眼睛扫一遍。
+
+想确认某个 Qoder 版本上真实存在哪些 token，直接问页面要：
+
+```js
+// 在 CDP evaluate 里跑
+const cs = getComputedStyle(document.documentElement);
+Array.from(cs).filter(n => n.startsWith('--color-')).map(n => `${n} = ${cs.getPropertyValue(n).trim()}`)
 ```
-
-`skin.css` 把它们统一改写到皮肤变量上。改完必须单独打开 Quest 窗口看一眼，编辑器正常不代表 Quest 正常。
 
 ## 毛玻璃
 

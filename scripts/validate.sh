@@ -75,6 +75,32 @@ if [[ -f "$CSS" ]]; then
   else
     ok "覆盖层不拦截鼠标事件"
   fi
+  # Quest 页面的文字色写死在 --color-text-* 里，不会跟着背景翻色。
+  # 只改背景不改前景 = 深底深字，对比度约 1:1，是这套方案最容易漏的 bug。
+  if grep -q -- '--color-bg-' "$CSS"; then
+    if grep -q -- '--color-text' "$CSS"; then
+      ok "Quest 前景色随背景一起改写"
+    else
+      fail "改写了 --color-bg-* 却没有 --color-text-*，Quest 页面会深底深字（见 references/runtime-layer.md）"
+    fi
+    if grep -q -- '--color-bg-base-static' "$CSS" && grep -q -- '--color-text-static' "$CSS"; then
+      ok "Quest -static 族已改写"
+    else
+      warn "未改写 --color-*-static 族，Quest 左侧列表等区域会保持写死的白底"
+    fi
+    # Quest 的 <html> 是 data-theme="light"，内部还有多个同名子作用域会重新定义 --color-*。
+    if grep -q -- '\[data-theme\]' "$CSS"; then
+      ok "改写铺到了 [data-theme] 子作用域"
+    else
+      fail "选择器没有覆盖 [data-theme]，Quest 内层子树的改写会被重新定义覆盖"
+    fi
+    # VSIX 主题管不到 Quest renderer，那边的 --vscode-* 停留在浅色默认值。
+    if grep -q -- '--vscode-foreground' "$CSS"; then
+      ok "Quest 的 --vscode-* 前景色已改写"
+    else
+      warn "未改写 --vscode-* 前景色，Quest 的下拉框、分支选择器等组件会是深色文字"
+    fi
+  fi
 else
   fail "运行时 CSS 缺失：$CSS"
 fi

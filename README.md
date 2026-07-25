@@ -101,7 +101,7 @@ export QODER_CLI='/Applications/Qoder.app/Contents/Resources/app/bin/code'
 SKILL.md          Skill 主文件：换肤流程与安全边界
 references/       配色系统、运行时注入原理、背景图要求、故障排查
 runtime/          皮肤无关的共享注入运行时
-scripts/          脚手架、校验、打包、安装、启动、恢复
+scripts/          脚手架、校验、对比度门禁、打包、安装、启动、恢复
 templates/        新皮肤模板
 skins/            各套皮肤，内置示例 qoder-moonlit-sakura
 ```

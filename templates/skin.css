@@ -17,16 +17,15 @@
   /* 低对比描边，用品牌色 + 很低的 alpha */
   --qoder-skin-border: rgba(226, 142, 180, 0.18);
 
-  /* ---- 插画层（html::after）：按背景图的主体大小和亮度调 ---- */
-  /* cover 会把主体放大到铺满窗口。主体本身占比大、或颜色明亮时，
-     改成 auto <高度百分比> 让它保持小尺寸缩在角落。 */
-  --qoder-skin-art-size: auto 46%;
-  --qoder-skin-art-position: right 1% bottom 4%;
-  /* 主体越亮、对比越强，这个值就要越低。深色柔和插画可到 0.28。 */
-  --qoder-skin-art-opacity: 0.30;
-  /* 遮罩把主体限制在右侧。AI 面板通常占右三分之一，
-     主体压在面板文字后面时，把起点继续往右推。 */
-  --qoder-skin-art-mask: linear-gradient(90deg, transparent 46%, rgba(0, 0, 0, 0.25) 60%, #000 74%);
+  /* ---- 插画层（html::after）---- */
+  /* 背景图要铺满整个窗口，cover 是默认值，不要改成缩在角落的小图。 */
+  --qoder-skin-art-size: cover;
+  --qoder-skin-art-position: center center;
+  /* 主体太抢、压住文字时调这个，别去缩小图。
+     深色柔和插画 0.28–0.34，明亮高饱和主体 0.18–0.26。 */
+  --qoder-skin-art-opacity: 0.28;
+  /* 遮罩让主体只在右侧显现，左侧代码区保持干净。 */
+  --qoder-skin-art-mask: linear-gradient(90deg, transparent 42%, rgba(0, 0, 0, 0.22) 58%, #000 78%);
 
   --qoder-skin-shadow: rgba(4, 5, 14, 0.38);
 }

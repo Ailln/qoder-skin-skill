@@ -132,8 +132,11 @@ Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判
 **Quest 独立窗口**、背景不拦截点击和输入。
 
 不满意就改 `skin.css` 再截一次——注入器每轮会重读 CSS 和图片，**改完等 3 秒就生效，不用重启**。
-插画层的四个变量（size / position / opacity / mask）通常要调两三轮才合适，见
-`references/runtime-layer.md`。
+一般要两三轮才收敛，光看 CSS 数值判断不了效果。
+
+调的时候记住一条：**背景图要铺满整个窗口**（`--qoder-skin-art-size: cover`）。主体压住文字时
+降 `--qoder-skin-art-opacity` 或提高面板不透明度，**不要把图缩到角落**——那样整窗氛围就没了，
+皮肤退化成一个角落贴纸。详见 `references/runtime-layer.md`。
 
 环境层面的问题（主题没切、注入器打架、应用被别的方案改过）用体检脚本定位：
 

@@ -24,8 +24,19 @@ VS Code 的主题机制不能设置窗口背景图，Quest 又是 Qoder 自己�
 
 - macOS + 已安装 Qoder（中文版 `Qoder CN.app` 或英文版 `Qoder.app`）
 - [Claude Code](https://claude.com/claude-code)
-- `jq`、`node`、`zip`（`brew install jq node`，zip 系统自带）
-- 可选：`cwebp` 压缩背景图（`brew install webp`）
+- `jq`、`node`、`zip`（`brew install jq node`，zip 和 sips 系统自带）
+- 可选：`cwebp` 压缩背景图（`brew install webp`），没有会自动退回 PNG
+- **一张你喜欢的背景图**——本地任意图片都行，png / jpg / heic 都能处理
+
+## 关于背景图
+
+背景图**需要你自己准备**。用 Claude Code 这类能生图的智能体时可以让它帮你画一张，但换个智能体（比如 Qoder 自带的）就没这个能力了，所以默认按"你提供图片"来走。
+
+挑图有三条标准：**主体在画面右侧**（左侧要留给文件树和代码）、**整体偏暗**、**细节别太密**。主体在左侧的图可以用 `--flip` 镜像翻过去；在正中间的建议换一张。
+
+图会自动缩放、压成 WebP，并**丢掉 EXIF 元数据**（手机照片里的 GPS 坐标不会被带进主题包）。
+
+实在没有合适的图，也可以只装第一层颜色主题——照样是一套完整可用的配色，只是没有背景图和毛玻璃。
 
 ## 安装
 
@@ -35,9 +46,9 @@ git clone git@github.com:Ailln/qoder-skin-skill.git ~/.claude/skills/qoder-skin
 
 装完在 Claude Code 里直接说：
 
-> 给 Qoder 做一套深海风格的皮肤
+> 给 Qoder 做一套深海风格的皮肤，背景图用 ~/Pictures/ocean.jpg
 
-Claude 会先和你确认主题名、配色和背景图构图，确认后再生成文件、打包安装、带调试端口启动 Qoder，最后逐项验证可读性。
+Claude 会先和你确认主题名、配色和背景图构图，确认后再生成文件、处理背景图、打包安装、带调试端口启动 Qoder，最后逐项验证可读性。
 
 ## 不用 Claude Code 也行
 
@@ -47,17 +58,20 @@ cd ~/.claude/skills/qoder-skin
 # 1. 从内置的月夜樱基线脚手架出一套新皮肤
 ./scripts/new-skin.sh qoder-deep-ocean "Qoder 深海" --desc "冷色调深海主题"
 
-# 2. 改 skins/qoder-deep-ocean/ 里的主题 JSON、skin.css，放入背景图
-#    配色怎么改见 references/color-system.md，背景图要求见 references/background-art.md
+# 2. 处理背景图（--flip 用于主体在左侧的图）
+./scripts/prepare-background.sh qoder-deep-ocean ~/Pictures/ocean.jpg
 
-# 3. 静态自检
+# 3. 改 skins/qoder-deep-ocean/ 里的主题 JSON 和 skin.css
+#    配色怎么改见 references/color-system.md
+
+# 4. 静态自检
 ./scripts/validate.sh qoder-deep-ocean
 
-# 4. 打包并安装颜色主题，装完在 Qoder 里选：
+# 5. 打包并安装颜色主题，装完在 Qoder 里选：
 #    文件 → 首选项 → 主题 → 颜色主题 → Qoder 深海
 ./scripts/install-theme.sh qoder-deep-ocean
 
-# 5. 先用 ⌘Q 完全退出 Qoder（含 Quest 窗口），再启动完整皮肤
+# 6. 先用 ⌘Q 完全退出 Qoder（含 Quest 窗口），再启动完整皮肤
 ./scripts/launch-themed-qoder.sh qoder-deep-ocean
 ```
 

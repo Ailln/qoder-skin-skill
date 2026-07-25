@@ -19,18 +19,29 @@ VS Code 主题机制不能设置窗口背景图，Quest 又是 Qoder 自己的�
 ## 前置条件
 
 - macOS，已安装 Qoder（默认 `/Applications/Qoder CN.app`，英文版用 `QODER_APP_PATH` 指定）
-- `jq`、`node`、`zip`、`unzip`
-- 背景图转 WebP 需要 `cwebp`（`brew install webp`）；没有也可以直接用 PNG/JPG，只是注入体积更大
+- `jq`、`node`、`zip`、`unzip`、`sips`（系统自带）
+- 可选 `cwebp`（`brew install webp`）压缩背景图；没有会自动退回 PNG
+- **一张用户提供的背景图**，见下
+
+## 背景图必须由用户提供
+
+**不要假设自己能生成图片。** 大多数编码智能体（包括 Qoder 自带的）没有生图能力，凭空往下走会卡在这一步或者编造一个不存在的文件。
+
+正确做法是在流程开始时就问用户要图，三条路：
+
+1. **用户给一张**（默认路径）——本地图片路径或让他拖进来。格式随意，`prepare-background.sh` 会统一处理。
+2. **你确实具备生图能力**——可以提议生成，但要先说明构图要求并让用户确认，别直接开画。
+3. **用户暂时没有图**——那就**只做第一层颜色主题**，明确告诉他缺的是背景图和毛玻璃，以后补一张图随时可以加上。不要因为没图就停在原地什么都不交付。
 
 ## 流程
 
 ### 1. 先和用户确认设计，再动手
 
-生成任何文件前，把这三件事说清楚并等确认：
+生成任何文件前，把这几件事说清楚并等确认：
 
 - **主题名与 slug**：slug 只能是小写字母、数字、连字符，会进 DOM id、CSS 选择器和 VSIX Identity。建议 `qoder-` 前缀。
 - **核心配色**：至少给出 base / surface / accent 三个颜色和整体氛围。
-- **背景图构图**：主体放右侧，左侧留给代码区。详见 `references/background-art.md`。
+- **背景图**：按上一节要到图，或者确认只做第一层。拿到图后先看一眼构图——主体在右侧最好，在左侧可以用 `--flip` 镜像救回来，在正中间就得换图。详见 `references/background-art.md`。
 
 不同皮肤必须用不同 slug，否则 VSIX 互相覆盖、注入的 style 节点互相打架。
 
@@ -52,9 +63,17 @@ VS Code 主题机制不能设置窗口背景图，Quest 又是 Qoder 自己的�
 
 ### 4. 背景图
 
-放到 `skins/<slug>/assets/<slug>.webp`（路径写在 `skin.json` 的 `background`）。
+把用户给的图交给脚本处理，不要手工转格式：
 
-构图要求、生成提示词写法、压缩命令见 `references/background-art.md`。原图用 ImageGen 生成或由用户提供都行，但必须是原创构图，不要用现成动漫 IP、品牌 Logo。
+```bash
+./scripts/prepare-background.sh <slug> <用户的图片路径> [--flip]
+```
+
+它会统一格式（png / jpg / heic / tiff 都吃）、按需水平镜像、缩放到 1672 宽、压成 WebP 放进 `skins/<slug>/assets/`，并**丢掉 EXIF 元数据**——用户的手机照片可能带 GPS 坐标，这一步是必要的。
+
+只做第一层（用户没给图）时跳过本步和第 5、8 步，交付到第 7 步为止，并说清楚少了什么。
+
+构图要求和挑图标准见 `references/background-art.md`。
 
 ### 5. 调运行时 CSS
 
@@ -114,7 +133,8 @@ Electron 单实例机制会让已有实例吞掉 `--remote-debugging-port`。判
 
 ```
 runtime/      cdp.mjs / injector.mjs / restore.mjs —— 皮肤无关的共享运行时
-scripts/      new-skin / validate / package-vsix / install-theme / launch-themed-qoder / restore
+scripts/      new-skin / prepare-background / validate / package-vsix
+              install-theme / launch-themed-qoder / restore
 templates/    新皮肤的 skin.css、skin.json、扩展清单模板
 skins/<slug>/ skin.json + skin.css + extension/ + assets/ + dist/ + screenshots/
 references/   按需查阅的详细资料

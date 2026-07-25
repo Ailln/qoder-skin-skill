@@ -25,13 +25,19 @@ jobs:
             ./scripts/validate.sh "$(basename "$dir")"
           done
 
-      - name: 脚手架冒烟测试
+      - name: 端到端冒烟测试
         run: |
           set -e
           ./scripts/new-skin.sh qoder-ci-smoke "CI 冒烟"
-          # 新皮肤还没有背景图，validate 必然报错，这里只确认它确实报了背景图缺失
+
+          # 新皮肤还没有背景图，validate 必须报错，否则说明校验失效
           if ./scripts/validate.sh qoder-ci-smoke; then
-            echo "缺背景图的皮肤竟然通过了校验，说明校验失效" >&2
+            echo "缺背景图的皮肤竟然通过了校验" >&2
             exit 1
           fi
           ./scripts/validate.sh qoder-ci-smoke 2>&1 | grep -q '背景图缺失'
+
+          # 补上背景图后必须转绿，顺带覆盖图片处理链路
+          ./scripts/prepare-background.sh qoder-ci-smoke \
+            skins/qoder-moonlit-sakura/assets/moonlit-sakura-source.png --flip
+          ./scripts/validate.sh qoder-ci-smoke

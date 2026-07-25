@@ -9,6 +9,8 @@
 
 ![Quest 页面效果](skins/qoder-moonlit-sakura/screenshots/qoder-quest.jpg)
 
+<sub>内置示例皮肤「月夜樱」的 Quest 页面。</sub>
+
 ## 换肤分两层
 
 | 层 | 负责什么 | 怎么生效 |

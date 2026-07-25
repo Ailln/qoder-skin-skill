@@ -10,7 +10,7 @@
      必须在这里显式改写，否则就是深底深字。三档取自主题的 foreground，逐级降 alpha。 */
   --qoder-skin-text: rgba(232, 230, 240, 0.96);
   --qoder-skin-text-secondary: rgba(232, 230, 240, 0.74);
-  --qoder-skin-text-tertiary: rgba(232, 230, 240, 0.62);
+  --qoder-skin-text-tertiary: rgba(232, 230, 240, 0.68);
   --qoder-skin-shadow: rgba(4, 5, 14, 0.38);
 }
 

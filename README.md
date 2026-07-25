@@ -73,6 +73,9 @@ cd ~/.claude/skills/qoder-skin
 
 # 6. 先用 ⌘Q 完全退出 Qoder（含 Quest 窗口），再启动完整皮肤
 ./scripts/launch-themed-qoder.sh qoder-deep-ocean
+
+# 7. 实机验证对比度，不达标会列出具体是哪几处文字
+./scripts/check-contrast.sh qoder-deep-ocean
 ```
 
 英文版 Qoder 或非默认安装路径，用环境变量指定：

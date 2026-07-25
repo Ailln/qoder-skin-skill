@@ -73,3 +73,14 @@ Qoder 在 VS Code 之外注册了一组自己的颜色，主要作用在 AI 面�
 ## 5. 自检
 
 改完跑 `./scripts/validate.sh <slug>`。第 6 步会报「与月夜樱基线完全相同的色值有多少」——超过 20% 说明有整块配色忘了改。
+
+装上并启动后再跑一次 `./scripts/check-contrast.sh <slug>`，它会实机量化每处文字的对比度。
+
+**占位符和非活动态的前景色也要算对比度，别只顾正文。** 这类键容易被当成「本来就该淡」而调得过暗：
+
+- `input.placeholderForeground` 落在 `aicoding.titleBarInputBackground` 上——命令中心显示的
+  就是它，实测有过 3.27:1 不达标的情况。
+- `titleBar.inactiveForeground`、`activityBar.inactiveForeground`、`panelTitle.inactiveForeground`
+  常和上面共用同一个色值，改一个记得一起看。
+
+淡是设计意图，不可读不是。想保持层次感就压低饱和度而不是压低明度。

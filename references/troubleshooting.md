@@ -83,6 +83,27 @@ jq -r '.checksums["vs/code/electron-browser/workbench/workbench.html"]' \
 
 各区域不透明度堆到 0.90 时，背景会被遮得只剩色调。解决办法是降低编辑器和面板不透明度到 0.78 左右，再加 `html::after` 的横向遮罩单独强调右侧主体。
 
+### Quest 页面深底深字，左侧列表还是白底
+
+编辑器一切正常，但 Quest 窗口的标题和正文几乎看不见，左侧 Quests / Chats 列表保持白底。
+实测过一次：标题「Quest on, hands off」是 `#141414` 落在 `#110F1E` 上，**对比度约 1:1**。
+
+原因是 Quest 页面上并存三套变量，皮肤只改了其中一套：
+
+1. `--color-*`（Qoder 设计系统）——只改背景族不够，前景族和 `-static` 族也得改。
+   `--color-bg-base-static` / `--color-bg-layout-static` 都写死成 `#FFFFFF`，就是白底的来源。
+2. **作用域**——Quest 的 `<html>` 是 `data-theme="light"`，页面内部还有多个同名子作用域，
+   各自重新定义一整套 `--color-*`。改写只挂在 `html, body` 上时，查根变量显示已生效、
+   子树里的文字却还是黑的。选择器必须包含 `[data-theme]`。
+3. `--vscode-*` 和 `--vscode-aicoding-*`——Quest 的 `<body>` 带的是 VS Code 浅色 class `.vs`，
+   **VSIX 主题只作用于 workbench renderer，管不到 Quest**，所以 `--vscode-foreground`
+   停在 `#141414`。下拉框、分支选择器、模型选择器直接读这些变量，前两层改得再全也没用。
+
+`validate.sh` 第 4 步会静态拦这三点，`check-contrast.sh` 会实机量化。完整映射见
+`references/runtime-layer.md` 和 `templates/skin.css`。
+
+**注意已有皮肤不会因为改了模板就自动修好**——每套皮肤各持一份 `skin.css` 副本，得逐套补。
+
 ### 界面点不动 / 输入没反应
 
 `html::after` 忘了 `pointer-events: none`。这层 `z-index` 极高，会吃掉所有鼠标事件。`validate.sh` 第 4 步会拦。
@@ -101,9 +122,21 @@ jq -r '.checksums["vs/code/electron-browser/workbench/workbench.html"]' \
 
 先跑 `./scripts/doctor.sh` 排除环境问题（应用被改过、没有调试端口、多个注入器打架、主题没切）。
 
-静态部分（`./scripts/validate.sh <slug>` 已全部覆盖）：JSON 语法、Node / Shell 语法、字段一致性、`aicoding.*` 白名单、CSS 关键约束、VSIX 可解压。
+静态部分（`./scripts/validate.sh <slug>` 已全部覆盖）：JSON 语法、Node / Shell 语法、字段一致性、`aicoding.*` 白名单、CSS 关键约束（含 Quest 三层变量是否都改了）、VSIX 可解压。
 
-实机部分必须人工或截图确认，**不要只声称完成**：
+实机部分先跑机器判据，再上肉眼：
+
+```bash
+./scripts/check-contrast.sh <slug>
+```
+
+遍历每个页面的可见文字算 WCAG 对比度，低于 4.5:1（大字 3:1）就非零退出并列出具体是哪几处。
+**必须全绿再往下走。**
+
+这一步是有来历的：早期只写「截图自己看一眼」，结果是截图里深底深字清清楚楚，
+仍然会被判定为完成——没有判据的自检倾向于通过。换成会失败的门禁才顶得回来。
+
+它测不到的是背景图压住文字的观感，那个只能看截图。剩下这些同样**不要只声称完成**：
 
 1. 主题能被 Qoder CLI 装上。
 2. 主题真的生效了——不是「设置里写了」，而是截图上颜色确实变了。
@@ -120,7 +153,18 @@ jq -r '.checksums["vs/code/electron-browser/workbench/workbench.html"]' \
 
 - 重跑一遍上面的实机清单。
 - 如果 Qoder 报未知配置，用新版本重新核对 `references/aicoding-keys.txt`。
-- 如果毛玻璃失效或某个区域没跟上，多半是 `.monaco-workbench > .part.*` 的类名或 Quest 页面的 `--color-*` 变量变了，用 CDP 直接查一下实际 DOM。
+- 如果毛玻璃失效或某个区域没跟上，多半是 `.monaco-workbench > .part.*` 的类名，或 Quest 页面
+  三套变量（`--color-*` / `--vscode-*` / `--vscode-aicoding-*`）的名字变了。跑一次
+  `./scripts/check-contrast.sh <slug>`，它会直接指出是哪些文字掉了对比度；再用 CDP
+  查当前版本真实存在哪些 token：
+
+```js
+// 在 CDP evaluate 里跑，注意要查 .quest-layout-mode 而不只是 documentElement——
+// --vscode-* 挂在内层容器上，查根节点会漏掉
+const cs = getComputedStyle(document.querySelector('.quest-layout-mode') || document.body);
+Array.from(cs).filter(n => n.startsWith('--color-') || n.startsWith('--vscode-'))
+  .map(n => `${n} = ${cs.getPropertyValue(n).trim()}`)
+```
 
 ## 卸载
 
